@@ -19,7 +19,7 @@ import swaggerDocument from './swagger-docs.json';
 
 const app = express();
 
-// configuration url to orgin
+// configuration url to origin
 const originUrls = [
 	'https://rentinout.onrender.com',
 	'http://rentinout.onrender.com',
