@@ -10,13 +10,13 @@ import fileUpload from 'express-fileupload';
 import { routesInit } from './routers/config_routes';
 import { sockets } from './routers/socket';
 import 'dotenv/config';
-import './db/mongoconnect';
 import { PORT } from './utils/environment-variables';
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import schemas from './models/swaggerSchemas';
 import swaggerDocument from './swagger-docs.json';
-
+import '../src/utils/environment-variables';
+import './db/mongoconnect';
 const app = express();
 
 // configuration url to orgin
