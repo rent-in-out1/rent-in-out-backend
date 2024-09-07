@@ -54,14 +54,16 @@ export const login = async (req: Request, res: Response, _next: NextFunction) =>
 };
 
 export const verifyUser = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	const { userId, uniqueString } = req.params;
+	let message: string;
 	try {
 		const user = (await UserVerificationModel.findOne({ userId })) as IUserVerification;
 		if (user) {
 			if (user.expiresAt < Date.now() + 2 * 60 * 60 * 1000) {
 				await UserVerificationModel.deleteOne({ userId });
 				await UserModel.deleteOne({ _id: userId });
-				const message = 'Link has expired. Please sign up again.';
+				message = 'Link has expired. Please sign up again.';
 				return res.redirect(`/users/verified/?error=true&message=${message}`);
 			} else {
 				const result = await bcrypt.compare(uniqueString, user.uniqueString);
@@ -69,39 +71,43 @@ export const verifyUser = async (req: Request, res: Response, _next: NextFunctio
 					const update = await UserModel.updateOne({ _id: userId }, { active: true });
 					if (update) {
 						await UserVerificationModel.deleteOne({ userId });
-						return res.sendFile(path.join(__dirname, './../views/verified.html'));
+						message = 'user verified successfully';
+						return res.redirect(`/users/verified/?error=false&message=${message}`);
 					} else {
-						const message = 'An error occurred while updating user verification status.';
+						message = 'An error occurred while updating user verification status.';
 						return res.status(401).json({ msg: `/users/verified/?error=true&message=${message}` });
 					}
 				} else {
 					await UserVerificationModel.deleteOne({ userId });
 					await UserModel.deleteOne({ _id: userId });
-					const message = 'Invalid verification details passed. Check your inbox.';
+					message = 'Invalid verification details passed. Check your inbox.';
 					return res.redirect(`/users/verified/?error=true&message=${message}`);
 				}
 			}
 		} else {
-			const message = 'Account does not exist or has been verified already. Please sign up or log in.';
+			message = 'Account does not exist or has been verified already. Please sign up or log in.';
 			return res.redirect(`/users/verified/?error=true&message=${message}`);
 		}
 	} catch (error) {
 		await UserVerificationModel.deleteOne({ uniqueString });
-		const message = 'An error occurred while checking for existing user verification record.';
+		message = 'An error occurred while checking for existing user verification record.';
 		return res.redirect(`/users/verified/?error=true&message=${message}`);
 	}
 };
 
 export const verifiedUser = (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - error=true&message=${message}
+	// should handle if error is false/true
 	return res.sendFile(path.join(__dirname, '../views/verified.html'));
 };
 
 export const requestPasswordReset = (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	const { email, redirectUrl } = req.body;
 	UserModel.findOne({ email }).then((data) => {
 		if (data) {
 			if (!data.active) {
-				return res.json({
+				return res.status(403).json({
 					status: 'failed',
 					message: "Email isn't verified yet or account has been suspended, please check your email",
 				});
@@ -109,19 +115,22 @@ export const requestPasswordReset = (req: Request, res: Response, _next: NextFun
 				sendResetEmail(data, redirectUrl, res);
 			}
 		} else {
-			return res.json({ status: 'failed', message: 'No account with the supplied email found. Please try again.' });
+			return res
+				.status(404)
+				.json({ status: 'failed', message: 'No account with the supplied email found. Please try again.' });
 		}
 	});
 };
 
 export const resetPassword = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	const { userId, resetString, newPassword } = req.body;
 	try {
 		const result = await PasswordReset.findOne({ userId });
 		if (result) {
 			if (result.expiresAt < Date.now() + 2 * 60 * 60 * 1000) {
 				await PasswordReset.deleteOne({ userId });
-				return res.status(401).json({ msg: 'Password reset link has expired' });
+				return res.status(403).json({ msg: 'Password reset link has expired' });
 			} else {
 				const validReset = await bcrypt.compare(resetString, result.resetString as string);
 				if (validReset) {
@@ -134,7 +143,7 @@ export const resetPassword = async (req: Request, res: Response, _next: NextFunc
 						await PasswordReset.deleteOne({ userId });
 						return res.status(200).json({ status: 'Success', msg: 'Password reset successfully' });
 					} else {
-						return res.status(401).json({ msg: 'Failed to update user password' });
+						return res.status(400).json({ msg: 'Failed to update user password' });
 					}
 				} else {
 					return res.status(401).json({ msg: 'Invalid password reset details' });

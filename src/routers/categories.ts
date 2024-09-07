@@ -20,17 +20,8 @@ const router = express();
  *     -  Categories operations
  *     description: Get categories list
  *     parameters:
- *      - in: query
- *        name: sort
- *        schema:
- *          type: number
- *          minimum: 1
- *        description: Sort by field name.
- *      - in: query
- *        name: reverse
- *        schema:
- *          type: string
- *        description: Reverse the data.
+ *      - $ref: '#/components/parameters/SortQueryParam'
+ *      - $ref: '#/components/parameters/ReverseQueryParam'
  *     responses:
  *       200:
  *         description: Returns the categories list.
@@ -56,27 +47,10 @@ router.get('/', getCategorylist);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *      - in: query
- *        name: perPage
- *        schema:
- *          type: number
- *          minimum: 10
- *        description: How many categories per page.
- *      - in: query
- *        name: page
- *        schema:
- *          type: string
- *        description: Selected page.
- *      - in: query
- *        name: sort
- *        schema:
- *          type: string
- *        description: Choose the element in the categories to be sorted.
- *      - in: query
- *        name: reverse
- *        schema:
- *          type: string
- *        description: reverse could be 'yes' for asc order or desc default.
+ *      - $ref: '#/components/parameters/PerPageQueryParam'
+ *      - $ref: '#/components/parameters/PageQueryParam'
+ *      - $ref: '#/components/parameters/SortQueryParam'
+ *      - $ref: '#/components/parameters/ReverseQueryParam'
  *     responses:
  *       200:
  *         description: Returns the filtered categories list.

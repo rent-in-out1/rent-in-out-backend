@@ -30,32 +30,10 @@ const router = express();
  *       - Posts operations
  *     description: Retrieve a list of all posts with pagination, sorting, and filtering options.
  *     parameters:
- *       - in: query
- *         name: perPage
- *         schema:
- *           type: integer
- *           default: 15
- *           maximum: 20
- *         description: Number of posts to return per page (maximum is 20).
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: The page number to retrieve.
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           default: createdAt
- *         description: The field to sort the posts by.
- *       - in: query
- *         name: reverse
- *         schema:
- *           type: string
- *           enum: [yes, no]
- *           default: no
- *         description: Whether to reverse the sort order (use 'yes' for descending order).
+ *       - $ref: '#/components/parameters/PerPageQueryParam'
+ *       - $ref: '#/components/parameters/PageQueryParam'
+ *       - $ref: '#/components/parameters/SortQueryParam'
+ *       - $ref: '#/components/parameters/ReverseQueryParam'
  *     responses:
  *       200:
  *         description: A list of posts.
@@ -86,12 +64,7 @@ router.get('/', getAllPosts);
  *       - Posts operations
  *     description: Retrieve a specific post by providing its ID.
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     responses:
  *       200:
  *         description: A post object.
@@ -164,52 +137,14 @@ router.get('/count', countAllPosts);
  *       - Posts operations
  *     description: Search posts based on a query, price range, categories, and other options. Supports pagination and sorting.
  *     parameters:
- *       - in: query
- *         name: perPage
- *         schema:
- *           type: integer
- *           default: 15
- *           maximum: 20
- *         description: Number of posts to return per page.
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number to retrieve.
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           default: createdAt
- *         description: Field by which to sort the results.
- *       - in: query
- *         name: reverse
- *         schema:
- *           type: string
- *           enum: [yes, no]
- *           default: no
- *         description: Whether to sort results in descending order.
- *       - in: query
- *         name: searchQ
- *         schema:
- *           type: string
- *         description: Search query to match against post titles.
- *       - in: query
- *         name: max
- *         schema:
- *           type: number
- *         description: Maximum price for filtering posts.
- *       - in: query
- *         name: min
- *         schema:
- *           type: number
- *         description: Minimum price for filtering posts.
- *       - in: query
- *         name: categories
- *         schema:
- *           type: string
- *         description: Comma-separated list of categories to filter posts by.
+ *       - $ref: '#/components/parameters/PerPageQueryParam'
+ *       - $ref: '#/components/parameters/PageQueryParam'
+ *       - $ref: '#/components/parameters/SortQueryParam'
+ *       - $ref: '#/components/parameters/ReverseQueryParam'
+ *       - $ref: '#/components/parameters/SearchQueryParam'
+ *       - $ref: '#/components/parameters/MaxPriceQueryParam'
+ *       - $ref: '#/components/parameters/MinPriceQueryParam'
+ *       - $ref: '#/components/parameters/CategoriesQueryParam'
  *     responses:
  *       200:
  *         description: A list of posts matching the search criteria.
@@ -246,12 +181,7 @@ router.get('/search', searchPosts);
  *       - Posts operations
  *     description: Retrieve the total number of likes for a post identified by its ID.
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     responses:
  *       200:
  *         description: The number of likes for the post.
@@ -287,12 +217,7 @@ router.get('/checkLikes/:postID', countPostLikes);
  *       - Posts operations
  *     description: Get the first three likes for a post identified by its ID. This retrieves a subset of likes from the post.
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     responses:
  *       200:
  *         description: The top three likes for the post.
@@ -372,38 +297,11 @@ router.get('/countMyPosts', auth, countMyPosts);
  *       - Posts operations
  *     description: Fetches a paginated and sorted list of posts created by the user identified by the `userID` parameter.
  *     parameters:
- *       - in: path
- *         name: userID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the user whose posts are to be retrieved.
- *       - in: query
- *         name: perPage
- *         schema:
- *           type: integer
- *           default: 10
- *           maximum: 20
- *         description: Number of posts to return per page (up to a maximum of 20).
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number to retrieve.
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           default: createdAt
- *         description: Field by which to sort the results.
- *       - in: query
- *         name: reverse
- *         schema:
- *           type: string
- *           enum: [yes, no]
- *           default: no
- *         description: Whether to sort results in descending order.
+ *       - $ref: '#/components/parameters/UserIdParam'
+ *       - $ref: '#/components/parameters/PerPageQueryParam'
+ *       - $ref: '#/components/parameters/PageQueryParam'
+ *       - $ref: '#/components/parameters/SortQueryParam'
+ *       - $ref: '#/components/parameters/ReverseQueryParam'
  *     responses:
  *       200:
  *         description: A paginated and sorted list of posts created by the specified user.
@@ -528,12 +426,7 @@ router.post('/', auth, postControl, uploadPost);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post to be liked or unliked.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     responses:
  *       201:
  *         description: Success message with updated post likes and status.
@@ -573,18 +466,8 @@ router.post('/likePost/:postID', auth, likePost);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post from which the image will be deleted.
- *       - in: path
- *         name: imgID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the image to be deleted from Cloudinary.
+ *       - $ref: '#/components/parameters/PostIdParam'
+ *       - $ref: '#/components/parameters/ImageIdParam'
  *     responses:
  *       200:
  *         description: Success message indicating that the image was deleted from both the post and Cloudinary.
@@ -611,10 +494,10 @@ router.post('/singleImgDel/:postID/:imgID', auth, deleteSinglePostImage);
 
 /**
  * @swagger
- * /cancel-delete:
+ * /posts/cancel-delete:
  *   post:
  *     tags:
- *       - General operations
+ *       - Posts operations
  *     summary: Must be connected as user
  *     description: Endpoint to handle the cancellation of a delete operation. Returns a success message indicating that the delete operation was cancelled.
  *     security:
@@ -657,12 +540,7 @@ router.post('/onCancelImgDel', auth, onCancelDelete);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post to be updated.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     requestBody:
  *       description: The fields of the post to be updated.
  *       required: true
@@ -744,12 +622,7 @@ router.put('/:postID', auth, updatePost);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post whose range is to be updated.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     requestBody:
  *       description: The new range value to be set for the post.
  *       required: true
@@ -816,12 +689,7 @@ router.patch('/changeRange/:postID', auth, postRangeControl, changePostRange);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post whose active status is being toggled.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     responses:
  *       200:
  *         description: Success message with the updated post data.
@@ -877,12 +745,7 @@ router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
  *     security:
  *       - apiKeyAuth: []
  *     parameters:
- *       - in: path
- *         name: postID
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique identifier of the post to be deleted.
+ *       - $ref: '#/components/parameters/PostIdParam'
  *     responses:
  *       200:
  *         description: Success message indicating that the post was successfully deleted.
