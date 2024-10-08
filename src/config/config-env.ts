@@ -6,6 +6,8 @@ export const envConfig = {
 	passDb: process.env.PASS_DB,
 	tokenSecret: process.env.TOKEN_SECRET,
 	refreshToken: process.env.REFRESH_TOKEN_SECRET,
+	mongoUrl: process.env.MONGO_URL,
+	nodeEnv: process.env.NODE_ENV,
 	superID: process.env.ADMIN_ID,
 	google_api: process.env.GOOGLE_API,
 	domain: process.env.DOMAIN,
