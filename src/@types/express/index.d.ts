@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { IUser } from '../../interfaces/userInterface.interface';
+import { ITokenDataModel } from '../global.types';
 export {};
 
 declare global {
@@ -8,10 +9,7 @@ declare global {
 			_id: Types.ObjectId;
 			user: IUser;
 
-			tokenData: {
-				_id: string | Types.ObjectId;
-				role: string;
-			};
+			tokenData: ITokenDataModel;
 		}
 	}
 }

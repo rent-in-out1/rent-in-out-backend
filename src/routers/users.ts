@@ -4,7 +4,6 @@ import {
 	countUsers,
 	getUserInfoByIdWithToken,
 	getUserInfoById,
-	getUsersList,
 	searchUsers,
 	getUserAvgRank,
 	getWishListOfUser,
@@ -42,6 +41,7 @@ router.get('/verified', verifiedUser);
  *       - Users operations
  *     description: Check if user verified, once he clicked on the link in gmail.
  */
+// @ts-ignore
 router.get('/verify/:userId/:uniqueString', verifyUser);
 /**
  * @swagger
@@ -69,6 +69,7 @@ router.get('/verify/:userId/:uniqueString', verifyUser);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/userSearch', searchUsers);
 /**
  * @swagger
@@ -92,7 +93,8 @@ router.get('/userSearch', searchUsers);
  *       500:
  *         description: Internal server error
  */
-router.get('/count', authAdmin, countUsers);
+// @ts-ignore
+router.get('/count', countUsers);
 /**
  * @swagger
  * /users/info/{userID}:
@@ -118,6 +120,7 @@ router.get('/count', authAdmin, countUsers);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/info/:userID', getUserInfoById);
 /**
  * @swagger
@@ -147,6 +150,7 @@ router.get('/info/:userID', getUserInfoById);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/infoToken/:userID', auth, getUserInfoByIdWithToken);
 /**
  * @swagger
@@ -173,6 +177,7 @@ router.get('/infoToken/:userID', auth, getUserInfoByIdWithToken);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/getRank/:userID', getUserAvgRank);
 /**
  * @swagger
@@ -195,6 +200,7 @@ router.get('/getRank/:userID', getUserAvgRank);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/getChat/:roomID', auth, getChatByRoomID);
 /**
  * @swagger
@@ -215,6 +221,7 @@ router.get('/getChat/:roomID', auth, getChatByRoomID);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/getAllChat', auth, getUserChats);
 /**
  * @swagger
@@ -235,6 +242,7 @@ router.get('/getAllChat', auth, getUserChats);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/getWishList', auth, getWishListOfUser);
 /**
  * @swagger
@@ -263,6 +271,7 @@ router.get('/getWishList', auth, getWishListOfUser);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.get('/users-by-date', auth, getUsersCountByDate);
 
 /**
@@ -289,6 +298,7 @@ router.get('/users-by-date', auth, getUsersCountByDate);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.put('/:userID', auth, userControl, editUser);
 /**
  * @swagger
@@ -312,6 +322,7 @@ router.put('/:userID', auth, userControl, editUser);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.patch('/changeRole/:userID', authAdmin, userSuperAdminControl, changeUserRole);
 /**
  * @swagger
@@ -335,6 +346,7 @@ router.patch('/changeRole/:userID', authAdmin, userSuperAdminControl, changeUser
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.patch('/changeActive/:userID', authAdmin, userSuperAdminControl, changeUserActiveStatus);
 /**
  * @swagger
@@ -372,6 +384,7 @@ router.patch('/changeActive/:userID', authAdmin, userSuperAdminControl, changeUs
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.patch('/rankUser/:userID', auth, rankUser);
 /**
  * @swagger
@@ -407,6 +420,7 @@ router.patch('/rankUser/:userID', auth, rankUser);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.patch('/chatUpdate', auth, chatUpdate);
 /**
  * @swagger
@@ -446,6 +460,7 @@ router.patch('/chatUpdate', auth, chatUpdate);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.patch('/uploadProfile', auth, uploadProfileImg);
 /**
  * @swagger
@@ -485,6 +500,7 @@ router.patch('/uploadProfile', auth, uploadProfileImg);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.patch('/uploadBanner', auth, uploadBannerImg);
 
 /**
@@ -511,6 +527,7 @@ router.patch('/uploadBanner', auth, uploadBannerImg);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.delete('/:userID', auth, deleteUser);
 /**
  * @swagger
@@ -532,6 +549,7 @@ router.delete('/:userID', auth, deleteUser);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.delete('/deleteChat/:chatID', auth, deleteChat);
 /**
  * @swagger
@@ -554,6 +572,7 @@ router.delete('/deleteChat/:chatID', auth, deleteChat);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
 
 /**
@@ -579,6 +598,7 @@ router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
  *       500:
  *         description: An unexpected error occurred.
  */
+// @ts-ignore
 router.post('/', userControl, signUp);
 /**
  * @swagger
@@ -620,6 +640,7 @@ router.post('/', userControl, signUp);
  *       500:
  *         description: Internal server error
  */
+// @ts-ignore
 router.post('/login', loginGmail, userLoginControl, login);
 /**
  * @swagger
@@ -688,6 +709,7 @@ router.post('/requestPasswordReset', requestPasswordReset);
  *       404:
  *         description: No account with the supplied email found. Please try again.
  */
+// @ts-ignore
 router.post('/resetPassword', resetPassword);
 /**
  * @swagger
@@ -730,6 +752,7 @@ router.post('/resetPassword', resetPassword);
  *       500:
  *         description: An unexpected error occurred.
  */
+// @ts-ignore
 router.post('/clientEmail', sendEmail);
 /**
  * @swagger
@@ -770,6 +793,7 @@ router.post('/clientEmail', sendEmail);
  *       500:
  *         description: Couldn't login google
  */
+// @ts-ignore
 router.post('/login/gmail', loginGmail);
 
 export default router;

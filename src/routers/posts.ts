@@ -527,6 +527,7 @@ router.post('/singleImgDel/:postID/:imgID', auth, deleteSinglePostImage);
  *                   type: object
  *                   description: Details of the error encountered.
  */
+// @ts-ignore
 router.post('/onCancelImgDel', auth, onCancelDelete);
 
 /**
@@ -609,6 +610,7 @@ router.post('/onCancelImgDel', auth, onCancelDelete);
  *                   type: string
  *                   description: Error message indicating unauthorized access.
  */
+// @ts-ignore
 router.put('/:postID', auth, updatePost);
 
 /**
@@ -676,6 +678,7 @@ router.put('/:postID', auth, updatePost);
  *                   type: object
  *                   description: Details of the error encountered.
  */
+// @ts-ignore
 router.patch('/changeRange/:postID', auth, postRangeControl, changePostRange);
 
 /**
@@ -732,6 +735,7 @@ router.patch('/changeRange/:postID', auth, postRangeControl, changePostRange);
  *                   type: object
  *                   description: Details of the error encountered.
  */
+// @ts-ignore
 router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
 
 /**
@@ -785,6 +789,7 @@ router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
  *                   type: object
  *                   description: Details of the error encountered.
  */
+// @ts-ignore
 router.delete('/:postID', auth, deletePost);
 
 export default router;

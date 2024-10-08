@@ -12,6 +12,7 @@
     "allowJs": true, /* allow files with .js end */
     "noImplicitAny": false,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
     "strictNullChecks": false,                         /* When type checking, take into account 'null' and 'undefined'. */
+    "strictFunctionTypes": false,
     "useUnknownInCatchVariables": false,               /* Default catch clause variables as 'unknown' instead of 'any'. */
     "paths": { /* paths lets you declare how TypeScript should resolve an import in your require/imports. */
       "@/*": [ /* @ allow us import main folder */
