@@ -4,10 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "nodemon src/app.ts",
+        "dev": "NODE_ENV=development nodemon src/app.ts",
         "build": "tsc",
         "full": "npm run lint && npm run build",
-        "start": "node dist/app.js",
+        "start": "NODE_ENV=production node dist/app.js",
         "lint": "eslint \"src/**/*.ts\"",
         "lint:fix": "eslint \"src/**/*.ts\" --fix"
     },

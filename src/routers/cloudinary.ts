@@ -37,33 +37,8 @@ const router = express();
  *                   description: The result from Cloudinary after deletion.
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       description: Error message
- *                     name:
- *                       type: string
- *                       description: Error name
- *                     http_code:
- *                       type: number
- *                       description: HTTP status code
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Couldn't find resource with id
  */
 router.delete('/image', auth, deleteImageCloudinary);
 

@@ -12,16 +12,17 @@ export const checkToken = (req: Request, res: Response, _next: NextFunction) => 
 };
 
 export const getUserInfoById = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	try {
-		const id = req.params.id;
-		const userInfo = await UserModel.findOne({ _id: id }, { password: 0 }).populate({
+		const userID = req.params.userID;
+		const userInfo = await UserModel.findOne({ _id: userID }, { password: 0 }).populate({
 			path: 'wishList',
 			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		if (!userInfo) {
 			return res.status(404).json({ message: 'User not found' });
 		}
-		return res.json({ userInfo });
+		return res.status(200).json({ userInfo });
 	} catch (err) {
 		console.error(err);
 		return res.status(500).json({ msg: 'Error occurred', err });
@@ -29,9 +30,10 @@ export const getUserInfoById = async (req: Request, res: Response, _next: NextFu
 };
 
 export const getUserInfoByIdWithToken = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	try {
-		const id = req.params.id;
-		const userInfo = await UserModel.findOne({ _id: id }, { password: 0 }).populate({
+		const userID = req.params.userID;
+		const userInfo = await UserModel.findOne({ _id: userID }, { password: 0 }).populate({
 			path: 'wishList',
 			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
@@ -39,7 +41,7 @@ export const getUserInfoByIdWithToken = async (req: Request, res: Response, _nex
 			return res.status(404).json({ message: 'User not found' });
 		}
 		const newAccessToken = await createToken(userInfo._id, userInfo.role);
-		return res.json({ userInfo, newAccessToken });
+		return res.status(200).json({ userInfo, newAccessToken });
 	} catch (err) {
 		return res.status(500).json({ msg: 'Error occurred', err });
 	}
@@ -65,7 +67,7 @@ export const getUsersList = async (req: Request, res: Response, _next: NextFunct
 export const countUsers = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const count = await UserModel.countDocuments({});
-		return res.json({ count });
+		return res.status(200).json({ count });
 	} catch (err) {
 		console.error(err);
 		return res.status(500).json({ msg: 'Error occurred', err });
@@ -82,7 +84,7 @@ export const changeUserRole = async (req: Request, res: Response, _next: NextFun
 		user.role = user.role === 'admin' ? 'user' : 'admin';
 		user.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 		await user.save();
-		return res.json(user);
+		return res.status(200).json(user);
 	} catch (err) {
 		console.error(err);
 		return res.status(500).json({ msg: 'Error occurred', err });
@@ -90,6 +92,7 @@ export const changeUserRole = async (req: Request, res: Response, _next: NextFun
 };
 
 export const changeUserActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	try {
 		const userID = req.params.userID;
 		const user = await UserModel.findOne({ _id: userID }).populate({
@@ -99,7 +102,7 @@ export const changeUserActiveStatus = async (req: Request, res: Response, _next:
 		user.active = !user.active;
 		user.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 		await user.save();
-		return res.json(user);
+		return res.status(200).json(user);
 	} catch (err) {
 		console.error(err);
 		return res.status(500).json({ msg: 'Error occurred', err });
@@ -107,18 +110,19 @@ export const changeUserActiveStatus = async (req: Request, res: Response, _next:
 };
 
 export const deleteUser = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	try {
-		const idDel = req.params.idDel;
+		const userID = req.params.userID;
 		let userInfo;
 
 		if (req.tokenData.role === 'admin') {
-			userInfo = await UserModel.deleteOne({ _id: idDel }, { password: 0 });
-		} else if (req.tokenData._id === idDel) {
+			userInfo = await UserModel.deleteOne({ _id: userID }, { password: 0 });
+		} else if (req.tokenData._id === userID) {
 			userInfo = await UserModel.deleteOne({ _id: req.tokenData._id }, { password: 0 });
 		} else {
 			return res.status(401).json({ msg: 'Not allowed' });
 		}
-		return res.json(userInfo);
+		return res.status(201).json(userInfo);
 	} catch (err) {
 		console.error(err);
 		return res.status(500).json({ msg: 'Error occurred', err });
@@ -127,17 +131,17 @@ export const deleteUser = async (req: Request, res: Response, _next: NextFunctio
 
 export const editUser = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
-		const idEdit = req.params.idEdit;
+		const userID = req.params.userID;
 		if (req.body.email || req.body.password) {
 			return res.status(401).json({ msg: 'Email/password change is not allowed' });
 		}
 		let user;
 		if (req.tokenData.role === 'admin') {
-			user = await UserModel.updateOne({ _id: idEdit }, req.body);
-		} else if (idEdit !== req.tokenData._id) {
+			user = await UserModel.updateOne({ _id: userID }, req.body);
+		} else if (userID !== req.tokenData._id) {
 			return res.sendStatus(401);
 		} else {
-			user = await UserModel.updateOne({ _id: idEdit }, req.body);
+			user = await UserModel.updateOne({ _id: userID }, req.body);
 		}
 		return res.status(200).json(user);
 	} catch (err) {
@@ -147,6 +151,7 @@ export const editUser = async (req: Request, res: Response, _next: NextFunction)
 };
 
 export const rankUser = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	const rankedUserId = req.params.userID;
 	const rnk = req.body.rnk;
 	if (rnk > 5) {
@@ -163,7 +168,7 @@ export const rankUser = async (req: Request, res: Response, _next: NextFunction)
 		if (!found) {
 			user.rank.push({ user_id: req.tokenData._id as string, rank: rnk });
 			await user.save();
-			return res.status(201).json({ msg: 'Rank succeeded' });
+			return res.status(200).json({ msg: 'Rank succeeded' });
 		} else {
 			user.rank.map((el) => {
 				if (el.user_id === req.tokenData._id) {
@@ -171,7 +176,7 @@ export const rankUser = async (req: Request, res: Response, _next: NextFunction)
 				}
 			});
 			await user.save();
-			return res.status(201).json({ msg: 'Rank override succeeded' });
+			return res.status(200).json({ msg: 'Rank override succeeded' });
 		}
 	} catch (err) {
 		console.error(err);
@@ -180,6 +185,7 @@ export const rankUser = async (req: Request, res: Response, _next: NextFunction)
 };
 
 export const getUserAvgRank = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	const rankedUserId = req.params.userID;
 	const rankingUser = req.query?.rankingUser as string;
 	try {
@@ -198,6 +204,7 @@ export const getUserAvgRank = async (req: Request, res: Response, _next: NextFun
 };
 
 export const searchUsers = async (req: Request, res: Response, _next: NextFunction) => {
+	// TODO - add controller to make sure user send you the params/query/body
 	const perPage = Math.min(Number(req.query.perPage) || 10, 20);
 	const page = Number(req.query.page) || 1;
 	const sort = (req.query.sort as string) || 'role';
@@ -232,7 +239,8 @@ export const searchUsers = async (req: Request, res: Response, _next: NextFuncti
 };
 
 export const uploadProfileImg = async (req: Request, res: Response, _next: NextFunction) => {
-	const image: Cloudinary = req.body as unknown as Cloudinary;
+	// TODO - add controller to make sure user send you the params/query/body
+	const image: Cloudinary = req.body as Cloudinary;
 
 	if (image) {
 		try {
@@ -249,7 +257,8 @@ export const uploadProfileImg = async (req: Request, res: Response, _next: NextF
 };
 
 export const uploadBannerImg = async (req: Request, res: Response, _next: NextFunction) => {
-	const banner: Cloudinary = req.body as unknown as Cloudinary;
+	// TODO - add controller to make sure user send you the params/query/body
+	const banner: Cloudinary = req.body as Cloudinary;
 
 	if (banner) {
 		try {
@@ -266,7 +275,7 @@ export const uploadBannerImg = async (req: Request, res: Response, _next: NextFu
 };
 
 export const getWishListOfUser = async (req: Request, res: Response, _next: NextFunction) => {
-	const user = await UserModel.findOne({ _id: req.tokenData._id })
+	const user: any = await UserModel.findOne({ _id: req.tokenData._id })
 		.populate({
 			path: 'wishList',
 			populate: { path: 'creator_id', select: selectFieldsPopulate },
@@ -276,11 +285,8 @@ export const getWishListOfUser = async (req: Request, res: Response, _next: Next
 			populate: { path: 'likes', select: selectFieldsPopulate },
 		});
 	try {
-		// TODO - improve ts ignore
 		const wishList = user.wishList.sort((a, b) => {
-			//@ts-ignore
 			const keyA = new Date(a.updatedAt);
-			//@ts-ignore
 			const keyB = new Date(b.updatedAt);
 			return keyA > keyB ? -1 : keyA < keyB ? 1 : 0;
 		});
@@ -291,25 +297,29 @@ export const getWishListOfUser = async (req: Request, res: Response, _next: Next
 };
 
 export const getUsersCountByDate = async (req: Request, res: Response, _next: NextFunction) => {
-	const data = await UserModel.find({ _id: { $ne: envConfig.superID } }, { password: 0 });
-	const usersCreatedDates = data.map((user) => user.createdAt);
-	const sortedUsersCreatedDates = usersCreatedDates.sort();
+	try {
+		const data = await UserModel.find({ _id: { $ne: envConfig.superID } }, { password: 0 });
+		const usersCreatedDates = data.map((user) => user.createdAt);
+		const sortedUsersCreatedDates = usersCreatedDates.sort();
 
-	const now = Date.now();
-	const threeYearsAgo = now - 3 * 365 * 24 * 60 * 60 * 1000; // 3 years in milliseconds
-	const halfYear = 182.5 * 24 * 60 * 60 * 1000; // half year in milliseconds
-	const intervals = [];
+		const now = Date.now();
+		const threeYearsAgo = now - 3 * 365 * 24 * 60 * 60 * 1000; // 3 years in milliseconds
+		const halfYear = 182.5 * 24 * 60 * 60 * 1000; // half year in milliseconds
+		const intervals = [];
 
-	for (let date = threeYearsAgo; date <= now; date += halfYear) {
-		intervals.push(date);
+		for (let date = threeYearsAgo; date <= now; date += halfYear) {
+			intervals.push(date);
+		}
+
+		const result = intervals.map((endDate) => {
+			return {
+				date: endDate,
+				count: sortedUsersCreatedDates.filter((ts) => ts <= endDate).length,
+			};
+		});
+
+		res.status(200).json(result);
+	} catch (err) {
+		res.status(500).json({ msg: 'Error occurred', err });
 	}
-
-	const result = intervals.map((endDate) => {
-		return {
-			date: endDate,
-			count: sortedUsersCreatedDates.filter((ts) => ts <= endDate).length,
-		};
-	});
-
-	return res.json(result);
 };

@@ -19,16 +19,12 @@ export const loginGmail = async (req: Request, res: Response, next: NextFunction
 			const user = await UserModel.findOne({
 				email: google_email,
 			});
-			if (!user) {
-				return res.status(401).json({ msg: 'User not found' });
-			}
-
+			if (!user) return res.status(404).json({ msg: 'User not found' });
 			const { active } = user;
-			if (!active) {
-				return res.status(401).json({ msg: 'User blocked/ need to verify your email' });
-			}
+			if (!active) return res.status(401).json({ msg: 'User blocked / need to verify your email' });
+
 			let newAccessToken = createToken(user._id, user.role);
-			return res.json({ token: newAccessToken, user });
+			return res.status(200).json({ token: newAccessToken, user });
 		} catch (err) {
 			return res.status(500).json({ msg: 'There was an error signing' });
 		}

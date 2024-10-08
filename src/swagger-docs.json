@@ -8,7 +8,6 @@
       },
       "basePath": "/swagger",
       "tags": [
-          { "name": "Main operations" },
           { "name": "Auth operations" },
           { "name": "Categories operations" },
           { "name": "Cloudinary operations" },
