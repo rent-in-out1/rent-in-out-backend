@@ -7,6 +7,8 @@ import { PasswordReset } from '../models/passwordReset';
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import { IUserVerification } from '../interfaces/userVerification.interface';
+import { AppError } from '../error/appError';
+import CommonResponseDict from '../utils/common-response-dict.utils';
 
 dotenv.config();
 const saltRounds = 10;
@@ -32,24 +34,53 @@ export const signUp = async (req: Request, res: Response, _next: NextFunction) =
 	}
 };
 
-export const login = async (req: Request, res: Response, _next: NextFunction) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+	// TODO - make sure that the return next() is the best option for handling middlewares
 	try {
 		const user = await UserModel.findOne({ email: req.body.email.toLowerCase() });
 		if (!user) {
-			return res.status(401).json({ msg: 'User not found' });
+			return next(
+				new AppError(
+					CommonResponseDict.Unauthorized.title,
+					CommonResponseDict.Unauthorized.code,
+					`User not found`,
+					true
+				)
+			);
 		}
 		const validPass = await bcrypt.compare(req.body.password, user.password);
 		if (!validPass) {
-			return res.status(401).json({ msg: 'Invalid password' });
+			return next(
+				new AppError(
+					CommonResponseDict.Unauthorized.title,
+					CommonResponseDict.Unauthorized.code,
+					'Invalid password',
+					true
+				)
+			);
 		}
 
 		if (!user.active) {
-			return res.status(401).json({ msg: 'User blocked or needs to verify email' });
+			return next(
+				new AppError(
+					CommonResponseDict.Unauthorized.title,
+					CommonResponseDict.Unauthorized.code,
+					'User blocked or needs to verify email',
+					true
+				)
+			);
 		}
 		const newAccessToken = createToken(user._id, user.role);
 		return res.json({ token: newAccessToken, user });
 	} catch (err) {
-		return res.status(500).json({ msg: 'There was an error signing in' });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error signing in',
+				false
+			)
+		);
 	}
 };
 
