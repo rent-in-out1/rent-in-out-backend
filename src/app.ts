@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import '../src/utils/environment-variables';
+import './utils/environment-variables';
 import express from 'express';
 import path from 'path';
 import http from 'http';
