@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { MessageModel } from '../models/messageModel';
 import { UserModel } from '../models/userModel';
+import CommonResponseDict from '../utils/common-response-dict.utils';
+import { AppError } from '../error/appError';
 
-export const chatUpdate = async (req: Request, res: Response, _next: NextFunction) => {
+export const chatUpdate = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user sent needed params/query/body
 	const message: any = await UserModel.findOne({ _id: req.body.userID }).populate({
 		path: 'messages',
@@ -25,11 +27,18 @@ export const chatUpdate = async (req: Request, res: Response, _next: NextFunctio
 		}
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getChatByRoomID = async (req: Request, res: Response, _next: NextFunction) => {
+export const getChatByRoomID = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user sent needed params/query/body
 	const user: any = await UserModel.findOne({ _id: req.tokenData._id }).populate({
 		path: 'messages',
@@ -40,14 +49,23 @@ export const getChatByRoomID = async (req: Request, res: Response, _next: NextFu
 			const messages = user.messages.filter((msg) => msg.roomID === roomID);
 			return res.status(200).json(messages);
 		} catch (err) {
-			return res.status(500).json({ err });
+			next(
+				new AppError(
+					CommonResponseDict.InternalServerError.title,
+					CommonResponseDict.InternalServerError.code,
+					'There was an error, please try again later',
+					false
+				)
+			);
 		}
 	} else {
-		return res.status(404).json({ msg: 'Chat not found' });
+		return next(
+			new AppError(CommonResponseDict.BadRequest.title, CommonResponseDict.BadRequest.code, 'Chat not found', true)
+		);
 	}
 };
 
-export const getUserChats = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUserChats = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const user: any = await UserModel.findOne({ _id: req.tokenData._id }).populate({
 			path: 'messages',
@@ -59,11 +77,18 @@ export const getUserChats = async (req: Request, res: Response, _next: NextFunct
 		});
 		return res.status(200).json(messages);
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const deleteMessage = async (req: Request, res: Response, _next: NextFunction) => {
+export const deleteMessage = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user sent needed params/query/body
 	const messageId = req.params.msgID;
 	const roomID = req.params.roomID;
@@ -85,16 +110,30 @@ export const deleteMessage = async (req: Request, res: Response, _next: NextFunc
 				await MessageModel.deleteOne({ _id: chat._id });
 				return res.status(201).json({ user, owner });
 			} catch (err) {
-				return res.status(400).json({ err });
+				next(
+					new AppError(
+						CommonResponseDict.BadRequest.title,
+						CommonResponseDict.BadRequest.code,
+						'Cannot delete message',
+						false
+					)
+				);
 			}
 		}
 		return res.sendStatus(200);
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const deleteChat = async (req: Request, res: Response, _next: NextFunction) => {
+export const deleteChat = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user sent needed params/query/body
 	const chatID = req.params.chatID;
 	const chat = await MessageModel.findById(chatID);
@@ -108,6 +147,13 @@ export const deleteChat = async (req: Request, res: Response, _next: NextFunctio
 		await MessageModel.deleteOne({ _id: chatID });
 		return res.status(200).json({ user, owner });
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
