@@ -31,4 +31,4 @@ Introducing RentApp, the ultimate solution for all your rental needs, whether it
 This project is licensed under the [MIT License](LICENSE).
 
 ## Linked Projects
-Navigate to [RentInOut Frontend](https://github.com/Shaybush/RentInOut_front)
+Navigate to [RentInOut Frontend](https://github.com/rent-in-out1/rent-in-out-frontend)
