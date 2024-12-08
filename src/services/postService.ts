@@ -6,11 +6,13 @@ import { UserModel } from '../models/userModel';
 import { v2 as cloudinary } from 'cloudinary';
 import { SortOrder, Types } from 'mongoose';
 import { selectFieldsPopulate } from '../config/populat.config';
+import CommonResponseDict from '../utils/common-response-dict.utils';
+import { AppError } from '../error/appError';
 
 const MAX = 10000000;
 const MIN = 0;
 
-export const getAllPosts = async (req: Request, res: Response, _next: NextFunction) => {
+export const getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
 	const perPage = Math.min(Number(req.query.perPage) || 15, 20);
 	const page = Number(req.query.page) || 1;
 	const sort = (req.query.sort as string) || 'createdAt';
@@ -24,21 +26,35 @@ export const getAllPosts = async (req: Request, res: Response, _next: NextFuncti
 			.populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.json(posts);
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getPostByID = async (req: Request, res: Response, _next: NextFunction) => {
+export const getPostByID = async (req: Request, res: Response, next: NextFunction) => {
 	const postID = req.params.postID;
 	try {
 		const post = await PostModel.findById(postID).populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.status(200).json(post);
 	} catch (err) {
-		return res.status(500).json({ err: 'Cannot find the post.' });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const uploadPost = async (req: Request, res: Response, _next: NextFunction) => {
+export const uploadPost = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const newPost = new PostModel(req.body);
 		newPost.creator_id = req.tokenData._id;
@@ -47,11 +63,18 @@ export const uploadPost = async (req: Request, res: Response, _next: NextFunctio
 		const post = await PostModel.findById(newPost._id).populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.status(201).json(post);
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const updatePost = async (req: Request, res: Response, _next: NextFunction) => {
+export const updatePost = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		let data;
@@ -66,14 +89,23 @@ export const updatePost = async (req: Request, res: Response, _next: NextFunctio
 			await post.save();
 			return res.status(200).json({ data, msg: 'Post edited' });
 		}
-		return res.status(400).json({ data: null, msg: 'Cannot edit post' });
+		return next(
+			new AppError(CommonResponseDict.BadRequest.title, CommonResponseDict.BadRequest.code, 'Cannot edit post', true)
+		);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const deletePost = async (req: Request, res: Response, _next: NextFunction) => {
+export const deletePost = async (req: Request, res: Response, next: NextFunction) => {
 	const postID = req.params.postID;
 	const details = {
 		cloud_name: envConfig.cloudinary_name,
@@ -104,10 +136,24 @@ export const deletePost = async (req: Request, res: Response, _next: NextFunctio
 			deleteCloudinaryImages();
 			return res.status(200).json({ data, msg: 'Post deleted' });
 		}
-		return res.status(400).json({ data: null, msg: 'User cannot delete this post' });
+		return next(
+			new AppError(
+				CommonResponseDict.BadRequest.title,
+				CommonResponseDict.BadRequest.code,
+				'User cannot delete this post',
+				true
+			)
+		);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -120,16 +166,23 @@ export const countAllPosts = async (req: Request, res: Response, _next: NextFunc
 	}
 };
 
-export const countMyPosts = async (req: Request, res: Response, _next: NextFunction) => {
+export const countMyPosts = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const count = await PostModel.countDocuments({ creator_id: req.tokenData._id });
 		return res.json({ count });
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const searchPosts = async (req: Request, res: Response, _next: NextFunction) => {
+export const searchPosts = async (req: Request, res: Response, next: NextFunction) => {
 	const perPage = Math.min(Number(req.query.perPage) || 15, 20);
 	const page = Number(req.query.page) || 1;
 	const sort = (req.query.sort as string) || 'createdAt';
@@ -166,15 +219,29 @@ export const searchPosts = async (req: Request, res: Response, _next: NextFuncti
 
 		return res.json({ count: posts.length, posts });
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const changeActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
+export const changeActiveStatus = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		if (postID === envConfig.superID) {
-			return res.status(401).json({ msg: 'You cannot change superadmin to user' });
+			return next(
+				new AppError(
+					CommonResponseDict.Unauthorized.title,
+					CommonResponseDict.Unauthorized.code,
+					'You cannot change superadmin to user',
+					true
+				)
+			);
 		}
 		const post = await PostModel.findOne({ _id: postID });
 		post.active = !post.active;
@@ -183,11 +250,18 @@ export const changeActiveStatus = async (req: Request, res: Response, _next: Nex
 
 		return res.status(200).json(post);
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getUserPosts = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUserPosts = async (req: Request, res: Response, next: NextFunction) => {
 	const perPage = Math.min(Number(req.query.perPage) || 10, 20);
 	const page = Number(req.query.page) || 1;
 	const sort = (req.query.sort as string) || 'createdAt';
@@ -201,16 +275,30 @@ export const getUserPosts = async (req: Request, res: Response, _next: NextFunct
 			.populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.json(posts);
 	} catch (err) {
-		return res.status(500).json({ err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const changePostRange = async (req: Request, res: Response, _next: NextFunction) => {
+export const changePostRange = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		let data;
 		if (postID === envConfig.superID) {
-			return res.status(401).json({ msg: 'You cannot change superadmin to user' });
+			return next(
+				new AppError(
+					CommonResponseDict.Unauthorized.title,
+					CommonResponseDict.Unauthorized.code,
+					'You cannot change superadmin to user',
+					true
+				)
+			);
 		}
 		if (req.tokenData.role === 'admin') {
 			data = await PostModel.updateOne({ _id: postID }, { range: req.body.range });
@@ -222,11 +310,18 @@ export const changePostRange = async (req: Request, res: Response, _next: NextFu
 		await post.save();
 		return res.json(data);
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const likePost = async (req: Request, res: Response, _next: NextFunction) => {
+export const likePost = async (req: Request, res: Response, next: NextFunction) => {
 	const user = await UserModel.findById(req.tokenData._id);
 	const postID = req.params.postID;
 	const post = await PostModel.findOne({ _id: postID })
@@ -239,7 +334,14 @@ export const likePost = async (req: Request, res: Response, _next: NextFunction)
 		await post.save();
 
 		if (!('creator_id' in post && typeof post.creator_id === 'object' && '_id' in post.creator_id)) {
-			return res.status(500).json({ message: 'Post creator_id is not populated correctly' });
+			return next(
+				new AppError(
+					CommonResponseDict.InternalServerError.title,
+					CommonResponseDict.InternalServerError.code,
+					'Post creator_id is not populated correctly',
+					false
+				)
+			);
 		}
 
 		const inWishlist = user.wishList.some((el) => String(el) === postID);
@@ -258,32 +360,53 @@ export const likePost = async (req: Request, res: Response, _next: NextFunction)
 	return res.status(201).json({ posts: post.likes, msg: 'Unliked the post' });
 };
 
-export const countPostLikes = async (req: Request, res: Response, _next: NextFunction) => {
+export const countPostLikes = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		const post = await PostModel.findOne({ _id: postID });
 		const likes = await post.likes;
 		return res.json({ count: likes.length });
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getTopThreeLikes = async (req: Request, res: Response, _next: NextFunction) => {
+export const getTopThreeLikes = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		const post = await PostModel.findOne({ _id: postID });
 		return res.json({ likes: post.likes.splice(0, 3) });
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const onCancelDelete = (req: Request, res: Response, _next: NextFunction) => {
+export const onCancelDelete = (req: Request, res: Response, next: NextFunction) => {
 	try {
 		return res.json({ msg: 'Delete all images succeeded' });
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -306,7 +429,7 @@ export const deleteSinglePostImage = async (req: Request, res: Response, _next: 
 	return res.json({ msg: 'Delete all images succeeded' });
 };
 
-export const countPostsByCategory = async (req: Request, res: Response, _next: NextFunction) => {
+export const countPostsByCategory = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const countMap = {};
 		const posts = await PostModel.find({});
@@ -323,6 +446,13 @@ export const countPostsByCategory = async (req: Request, res: Response, _next: N
 		return res.json(categoriesCount);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };

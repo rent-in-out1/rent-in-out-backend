@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { CategoryModel } from '../models/categoryModel';
 import { SortOrder } from 'mongoose';
 import { selectFieldsPopulate } from '../config/populat.config';
+import { AppError } from '../error/appError';
+import CommonResponseDict, { HttpCode } from '../utils/common-response-dict.utils';
 
 // Get Category List
 export const getCategorylist = async (req: Request, res: Response, _next: NextFunction) => {
@@ -14,7 +16,14 @@ export const getCategorylist = async (req: Request, res: Response, _next: NextFu
 			.populate({ path: 'editor_id', select: selectFieldsPopulate });
 		return res.json(data);
 	} catch (err) {
-		return res.status(500).json({ msg: 'There was an error, please try again later', err });
+		_next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -42,7 +51,14 @@ export const searchCategories = async (req: Request, res: Response, _next: NextF
 
 		return res.json(categories);
 	} catch (error) {
-		return res.status(500).json({ msg: 'There was an error, please try again later', err: error });
+		_next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -60,13 +76,24 @@ export const addCategory = async (req: Request, res: Response, _next: NextFuncti
 		return res.json(category);
 	} catch (error: any) {
 		if (error.code === 11000) {
-			return res.status(409).json({
-				msg: 'Category already in system, try a different name',
-				code: 11000,
-			});
+			return _next(
+				new AppError(
+					'DuplicateField',
+					HttpCode.DuplicateField,
+					'Category already in system, try a different name',
+					true
+				)
+			);
 		}
 
-		return res.status(500).json({ msg: 'There was an error, please try again later', err: error });
+		_next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -82,10 +109,18 @@ export const editCategory = async (req: Request, res: Response, _next: NextFunct
 			await category.save();
 			return res.status(200).json({ category });
 		}
-		return res.status(400).json({ msg: 'Category not found' });
+		return _next(
+			new AppError(CommonResponseDict.BadRequest.title, CommonResponseDict.BadRequest.code, 'Category not found', true)
+		);
 	} catch (error) {
-		console.error(error);
-		return res.status(500).json({ msg: 'There was an error, please try again later', err: error });
+		_next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -96,8 +131,14 @@ export const deleteCategory = async (req: Request, res: Response, _next: NextFun
 		const data = await CategoryModel.deleteOne({ _id: idDel });
 		return res.json(data);
 	} catch (error) {
-		console.error(error);
-		return res.status(500).json({ msg: 'There was an error, please try again later', err: error });
+		_next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
@@ -107,7 +148,13 @@ export const countCategories = async (req: Request, res: Response, _next: NextFu
 		const count = await CategoryModel.countDocuments({});
 		return res.json({ count });
 	} catch (error) {
-		console.error(error);
-		return res.status(500).json({ msg: 'There was an error, please try again later', err: error });
+		_next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };

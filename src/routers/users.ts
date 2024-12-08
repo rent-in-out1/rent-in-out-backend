@@ -72,7 +72,7 @@ router.get('/verify/:userId/:uniqueString', verifyUser);
 router.get('/userSearch', searchUsers);
 /**
  * @swagger
- * /users/info/{userID}:
+ * /users/count:
  *   get:
  *     tags:
  *       - Users operations

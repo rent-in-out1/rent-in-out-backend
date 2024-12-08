@@ -5,13 +5,14 @@ import { NextFunction, Request, Response } from 'express';
 import { SortOrder } from 'mongoose';
 import { Cloudinary } from '../interfaces/userInterface.interface';
 import { selectFieldsPopulate } from '../config/populat.config';
-import { deleteImageCloudinary } from './cloudinaryService';
+import CommonResponseDict from '../utils/common-response-dict.utils';
+import { AppError } from '../error/appError';
 
-export const checkToken = (req: Request, res: Response, _next: NextFunction) => {
+export const checkToken = (req: Request, res: Response, next: NextFunction) => {
 	return res.json(req.tokenData);
 };
 
-export const getUserInfoById = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUserInfoById = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	try {
 		const userID = req.params.userID;
@@ -20,16 +21,30 @@ export const getUserInfoById = async (req: Request, res: Response, _next: NextFu
 			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		if (!userInfo) {
-			return res.status(404).json({ message: 'User not found' });
+			return next(
+				new AppError(
+					CommonResponseDict.ResourceNotFound.title,
+					CommonResponseDict.ResourceNotFound.code,
+					'User not found',
+					true
+				)
+			);
 		}
 		return res.status(200).json({ userInfo });
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getUserInfoByIdWithToken = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUserInfoByIdWithToken = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	try {
 		const userID = req.params.userID;
@@ -38,16 +53,30 @@ export const getUserInfoByIdWithToken = async (req: Request, res: Response, _nex
 			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		if (!userInfo) {
-			return res.status(404).json({ message: 'User not found' });
+			return next(
+				new AppError(
+					CommonResponseDict.ResourceNotFound.title,
+					CommonResponseDict.ResourceNotFound.code,
+					'User not found',
+					true
+				)
+			);
 		}
 		const newAccessToken = await createToken(userInfo._id, userInfo.role);
 		return res.status(200).json({ userInfo, newAccessToken });
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getUsersList = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUsersList = async (req: Request, res: Response, next: NextFunction) => {
 	const perPage = Math.min(Number(req.query.perPage) || 10, 20);
 	const page = Number(req.query.page) || 1;
 	const sort = (req.query.sort as string) || 'role';
@@ -60,21 +89,35 @@ export const getUsersList = async (req: Request, res: Response, _next: NextFunct
 		return res.json(data);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const countUsers = async (req: Request, res: Response, _next: NextFunction) => {
+export const countUsers = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const count = await UserModel.countDocuments({});
 		return res.status(200).json({ count });
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const changeUserRole = async (req: Request, res: Response, _next: NextFunction) => {
+export const changeUserRole = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const userID = req.params.userID;
 		const user = await UserModel.findOne({ _id: userID }).populate({
@@ -87,11 +130,18 @@ export const changeUserRole = async (req: Request, res: Response, _next: NextFun
 		return res.status(200).json(user);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const changeUserActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
+export const changeUserActiveStatus = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	try {
 		const userID = req.params.userID;
@@ -105,11 +155,18 @@ export const changeUserActiveStatus = async (req: Request, res: Response, _next:
 		return res.status(200).json(user);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const deleteUser = async (req: Request, res: Response, _next: NextFunction) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	try {
 		const userID = req.params.userID;
@@ -120,45 +177,82 @@ export const deleteUser = async (req: Request, res: Response, _next: NextFunctio
 		} else if (req.tokenData._id === userID) {
 			userInfo = await UserModel.deleteOne({ _id: req.tokenData._id }, { password: 0 });
 		} else {
-			return res.status(401).json({ msg: 'Not allowed' });
+			return next(
+				new AppError(CommonResponseDict.Unauthorized.title, CommonResponseDict.Unauthorized.code, 'Not allowed', true)
+			);
 		}
 		return res.status(201).json(userInfo);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const editUser = async (req: Request, res: Response, _next: NextFunction) => {
+export const editUser = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const userID = req.params.userID;
 		if (req.body.email || req.body.password) {
-			return res.status(401).json({ msg: 'Email/password change is not allowed' });
+			return new AppError(
+				CommonResponseDict.Unauthorized.title,
+				CommonResponseDict.Unauthorized.code,
+				'Email/password change is not allowed',
+				true
+			);
 		}
 		let user;
 		if (req.tokenData.role === 'admin') {
 			user = await UserModel.updateOne({ _id: userID }, req.body);
 		} else if (userID !== req.tokenData._id) {
-			return res.sendStatus(401);
+			return next(
+				new AppError(CommonResponseDict.Unauthorized.title, CommonResponseDict.Unauthorized.code, 'Not allowed', true)
+			);
 		} else {
 			user = await UserModel.updateOne({ _id: userID }, req.body);
 		}
 		return res.status(200).json(user);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const rankUser = async (req: Request, res: Response, _next: NextFunction) => {
+export const rankUser = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	const rankedUserId = req.params.userID;
 	const rnk = req.body.rnk;
 	if (rnk > 5) {
-		return res.status(401).json({ msg: 'Cannot rank more than 5' });
+		return next(
+			new AppError(
+				CommonResponseDict.Unauthorized.title,
+				CommonResponseDict.Unauthorized.code,
+				'Cannot rank more than 5',
+				true
+			)
+		);
 	}
 	if (rankedUserId === req.tokenData._id) {
-		return res.status(401).json({ msg: "You can't rank yourself" });
+		return next(
+			new AppError(
+				CommonResponseDict.Unauthorized.title,
+				CommonResponseDict.Unauthorized.code,
+				"You can't rank yourself",
+				true
+			)
+		);
 	}
 	try {
 		const user = await UserModel.findOne({
@@ -180,11 +274,18 @@ export const rankUser = async (req: Request, res: Response, _next: NextFunction)
 		}
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Not possible to rank at this time', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getUserAvgRank = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUserAvgRank = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	const rankedUserId = req.params.userID;
 	const rankingUser = req.query?.rankingUser as string;
@@ -199,11 +300,18 @@ export const getUserAvgRank = async (req: Request, res: Response, _next: NextFun
 		const average = ranks.reduce((a, b) => a + b, 0) / ranks.length;
 		return res.status(200).json({ average, userRank: user.rank[0].rank });
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error occurred, try again later', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const searchUsers = async (req: Request, res: Response, _next: NextFunction) => {
+export const searchUsers = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	const perPage = Math.min(Number(req.query.perPage) || 10, 20);
 	const page = Number(req.query.page) || 1;
@@ -234,11 +342,18 @@ export const searchUsers = async (req: Request, res: Response, _next: NextFuncti
 		return res.json(users);
 	} catch (err) {
 		console.error(err);
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const uploadProfileImg = async (req: Request, res: Response, _next: NextFunction) => {
+export const uploadProfileImg = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	const image: Cloudinary = req.body as Cloudinary;
 
@@ -249,14 +364,28 @@ export const uploadProfileImg = async (req: Request, res: Response, _next: NextF
 			await user.save();
 			return res.status(200).json({ res: 'Profile image has been changed' });
 		} catch (err) {
-			return res.status(500).json({ res: 'Error occurred', err });
+			next(
+				new AppError(
+					CommonResponseDict.InternalServerError.title,
+					CommonResponseDict.InternalServerError.code,
+					'There was an error, please try again later',
+					false
+				)
+			);
 		}
 	} else {
-		return res.status(404).json({ msg: 'Must send an image' });
+		return next(
+			new AppError(
+				CommonResponseDict.ResourceNotFound.title,
+				CommonResponseDict.ResourceNotFound.code,
+				'Must send an image',
+				true
+			)
+		);
 	}
 };
 
-export const uploadBannerImg = async (req: Request, res: Response, _next: NextFunction) => {
+export const uploadBannerImg = async (req: Request, res: Response, next: NextFunction) => {
 	// TODO - add controller to make sure user send you the params/query/body
 	const banner: Cloudinary = req.body as Cloudinary;
 
@@ -267,14 +396,28 @@ export const uploadBannerImg = async (req: Request, res: Response, _next: NextFu
 			await user.save();
 			return res.status(200).json({ res: 'Banner image has been changed' });
 		} catch (err) {
-			return res.status(500).json({ res: 'Error occurred', err });
+			next(
+				new AppError(
+					CommonResponseDict.InternalServerError.title,
+					CommonResponseDict.InternalServerError.code,
+					'There was an error, please try again later',
+					false
+				)
+			);
 		}
 	} else {
-		return res.status(404).json({ res: 'Must send a banner' });
+		return next(
+			new AppError(
+				CommonResponseDict.Unauthorized.title,
+				CommonResponseDict.Unauthorized.code,
+				'Must send a banner',
+				true
+			)
+		);
 	}
 };
 
-export const getWishListOfUser = async (req: Request, res: Response, _next: NextFunction) => {
+export const getWishListOfUser = async (req: Request, res: Response, next: NextFunction) => {
 	const user: any = await UserModel.findOne({ _id: req.tokenData._id })
 		.populate({
 			path: 'wishList',
@@ -292,11 +435,18 @@ export const getWishListOfUser = async (req: Request, res: Response, _next: Next
 		});
 		return res.status(200).json(wishList);
 	} catch (err) {
-		return res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };
 
-export const getUsersCountByDate = async (req: Request, res: Response, _next: NextFunction) => {
+export const getUsersCountByDate = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const data = await UserModel.find({ _id: { $ne: envConfig.superID } }, { password: 0 });
 		const usersCreatedDates = data.map((user) => user.createdAt);
@@ -320,6 +470,13 @@ export const getUsersCountByDate = async (req: Request, res: Response, _next: Ne
 
 		res.status(200).json(result);
 	} catch (err) {
-		res.status(500).json({ msg: 'Error occurred', err });
+		next(
+			new AppError(
+				CommonResponseDict.InternalServerError.title,
+				CommonResponseDict.InternalServerError.code,
+				'There was an error, please try again later',
+				false
+			)
+		);
 	}
 };

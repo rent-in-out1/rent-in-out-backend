@@ -16,6 +16,7 @@ import './db/mongoconnect';
 import { parametersDefinitions, schemasDefinitions } from './models/swagger';
 import { sessionConfig } from './config/session';
 import { confirmedUrls } from './config/confirmedUrls.config';
+import { AppError } from './error/appError';
 
 const app = express();
 
@@ -54,6 +55,11 @@ const io = new Server(server, {
 		origin: confirmedUrls,
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	},
+});
+
+app.use((err: AppError, req: Request, res: Response, _next: NextFunction) => {
+	console.error(`${req.method}:${req.originalUrl}, failed with error:${err}`);
+	res.status(err.httpCode).json({ message: err.message, title: err.name, isOperational: err.isOperational });
 });
 
 server.listen(PORT, () => {
