@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import '../src/utils/environment-variables';
 import express from 'express';
 import path from 'path';
 import http from 'http';
@@ -8,7 +7,6 @@ import { Server } from 'socket.io';
 import fileUpload from 'express-fileupload';
 import { routesInit } from './routers/config_routes';
 import { sockets } from './routers/socket';
-import { PORT } from './utils/environment-variables';
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger-docs.json';
@@ -16,6 +14,7 @@ import './db/mongoconnect';
 import { parametersDefinitions, schemasDefinitions } from './models/swagger';
 import { sessionConfig } from './config/session';
 import { confirmedUrls } from './config/confirmedUrls.config';
+import { envConfig } from './config/config-env';
 
 const app = express();
 
@@ -56,7 +55,7 @@ const io = new Server(server, {
 	},
 });
 
-server.listen(PORT, () => {
-	console.log(`Server is running on port: ${PORT}`);
+server.listen(envConfig.PORT, () => {
+	console.log(`Server is running on port: ${envConfig.PORT}`);
 });
 io.on('connection', sockets);
