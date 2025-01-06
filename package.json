@@ -6,10 +6,11 @@
     "scripts": {
         "dev": "NODE_ENV=development nodemon src/app.ts",
         "build": "tsc",
-        "full": "npm run lint && npm run build",
+        "full": "pnpm run lint && pnpm run build",
         "start": "NODE_ENV=production node dist/app.js",
         "lint": "eslint \"src/**/*.ts\"",
-        "lint:fix": "eslint \"src/**/*.ts\" --fix"
+        "lint:fix": "eslint \"src/**/*.ts\" --fix",
+        "docker-mongo": "docker-compose up -d"
     },
     "keywords": [],
     "author": "",
