@@ -2,3 +2,6 @@
 /.env.production
 /.env.development
 /dist
+/env
+pnpm-lock.yaml
+package-lock.json
